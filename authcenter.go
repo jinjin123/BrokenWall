@@ -15,7 +15,7 @@ import (
 func getContent () []string {
     fileIn, fileInErr := os.Open("text")
     if fileInErr != nil{
-        fmt.Println("error!")
+        fmt.Println("get auth order error")
     }
     defer fileIn.Close()
     finReader := bufio.NewReader(fileIn)
@@ -32,7 +32,7 @@ func getContent () []string {
 func getIp () string {
 	fileIn, fileInErr := os.Open("ip")
 	if fileInErr != nil{
-		fmt.Println("error!")
+		fmt.Println("get dynamic ip error")
 	}
 	defer fileIn.Close()
 	finReader := bufio.NewReader(fileIn)
