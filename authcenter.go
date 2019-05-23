@@ -3,6 +3,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"gopkg.in/olahol/melody.v1"
         "fmt"
+        "log"
 	"net/http" 
 	"bufio"
 	"os"
@@ -71,7 +72,7 @@ func main() {
 		message := c.PostForm("name")
 		ext := c.PostForm("ext")
 		auth := c.PostForm("auth")
-		fmt.Println(auth,ext)
+		log.Println(auth,ext)
 		_,error := Contain(message,list)
 		if error != nil {
 			c.JSON(http.StatusOK,gin.H{"msg":"授权失败,联系开发者付款","code": -1})
