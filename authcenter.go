@@ -1,44 +1,67 @@
 package main
+
 import (
+	"bufio"
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"gopkg.in/olahol/melody.v1"
-        "fmt"
-        "log"
-	"net/http" 
-	"bufio"
-	"os"
 	"io"
 	"io/ioutil"
+	"log"
+	"net/http"
+	"os"
 	"reflect"
 	"strings"
 )
 
-func getContent () []string {
-    fileIn, fileInErr := os.Open("text")
-    if fileInErr != nil{
-        fmt.Println("get auth order error")
-    }
-    defer fileIn.Close()
-    finReader := bufio.NewReader(fileIn)
-    var fileList []string
-    for {
-        inputString, readerError := finReader.ReadString('\n')
-        if readerError == io.EOF{
-            break
-        }
-        fileList = append(fileList, strings.Replace(inputString,"\n","",-1))
-    }
-    return fileList
+func Killip() string {
+	fileIn, fileInErr := os.Open("killip")
+	if fileInErr != nil {
+		fmt.Println("killhostiderror")
+	}
+	defer fileIn.Close()
+	finReader := bufio.NewReader(fileIn)
+	inputString, _ := finReader.ReadString('\n')
+	newString := strings.Replace(inputString, "\n", "", -1)
+	return newString
 }
-func getIp () string {
+func Allkill() string {
+	fileIn, fileInErr := os.Open("allkill")
+	if fileInErr != nil {
+		fmt.Println("allkillerror")
+	}
+	defer fileIn.Close()
+	finReader := bufio.NewReader(fileIn)
+	inputString, _ := finReader.ReadString('\n')
+	newString := strings.Replace(inputString, "\n", "", -1)
+	return newString
+}
+func getContent() []string {
+	fileIn, fileInErr := os.Open("text")
+	if fileInErr != nil {
+		fmt.Println("get auth order error")
+	}
+	defer fileIn.Close()
+	finReader := bufio.NewReader(fileIn)
+	var fileList []string
+	for {
+		inputString, readerError := finReader.ReadString('\n')
+		if readerError == io.EOF {
+			break
+		}
+		fileList = append(fileList, strings.Replace(inputString, "\n", "", -1))
+	}
+	return fileList
+}
+func getIp() string {
 	fileIn, fileInErr := os.Open("ip")
-	if fileInErr != nil{
+	if fileInErr != nil {
 		fmt.Println("get dynamic ip error")
 	}
 	defer fileIn.Close()
 	finReader := bufio.NewReader(fileIn)
 	inputString, _ := finReader.ReadString('\n')
-	newString := strings.Replace(inputString,"\n","",-1)
+	newString := strings.Replace(inputString, "\n", "", -1)
 	return newString
 }
 func Contain(obj interface{}, target interface{}) (bool, error) {
@@ -56,13 +79,12 @@ func Contain(obj interface{}, target interface{}) (bool, error) {
 		}
 	}
 
-	return false,fmt.Errorf("not in array")
+	return false, fmt.Errorf("not in array")
 }
-
 
 func main() {
 	gin.DisableConsoleColor()
-	f,_ := os.Create("gin.log")
+	f, _ := os.Create("gin.log")
 	gin.DefaultWriter = io.MultiWriter(f)
 	r := gin.Default()
 	m := melody.New()
@@ -72,26 +94,49 @@ func main() {
 		message := c.PostForm("name")
 		ext := c.PostForm("ext")
 		auth := c.PostForm("auth")
-		log.Println(auth,ext)
-		_,error := Contain(message,list)
+		log.Println(auth, ext)
+		_, error := Contain(message, list)
 		if error != nil {
-			c.JSON(http.StatusOK,gin.H{"msg":"授权失败,联系开发者付款","code": -1})
-			return 
+			c.JSON(http.StatusOK, gin.H{"msg": "授权失败,联系开发者付款", "code": -1})
+			return
 		}
-		c.JSON(http.StatusOK,gin.H{"msg":"认证通过","code":0,"remote":ip})
+		c.JSON(http.StatusOK, gin.H{"msg": "认证通过", "code": 0, "remote": ip})
+	})
+	r.POST("/killip", func(c *gin.Context) {
+		t := c.PostForm("killip")
+		err := ioutil.WriteFile("killip", []byte(t), 0644)
+		if err != nil {
+			fmt.Errorf("killip保存失败: %s", err)
+		}
+		c.JSON(http.StatusOK, gin.H{"msg": "杀掉IP", "code": 0, "remote": t})
+	})
+	r.POST("/allkill", func(c *gin.Context) {
+		t := c.PostForm("allkill")
+		err := ioutil.WriteFile("allkill", []byte(t), 0644)
+		if err != nil {
+			fmt.Errorf("allkill保存失败: %s", err)
+		}
+		c.JSON(http.StatusOK, gin.H{"msg": "allkill", "code": 0, "remote": t})
 	})
 	r.POST("/save", func(c *gin.Context) {
 		t := c.PostForm("ip")
 		err := ioutil.WriteFile("ip", []byte(t), 0644)
 		if err != nil {
-			fmt.Errorf("保存配置到文件出错: %s",  err)
+			fmt.Errorf("保存配置到文件出错: %s", err)
 		}
-		c.JSON(http.StatusOK,gin.H{"msg":"认证通过","code":0,"remote":t})
+		c.JSON(http.StatusOK, gin.H{"msg": "认证通过", "code": 0, "remote": t})
+	})
+	r.GET("/Killip", func(c *gin.Context) {
+		status := Killip()
+		c.JSON(http.StatusOK, gin.H{"msg": "认证通过", "code": 0, "hostid": status})
+	})
+	r.GET("/Allkill", func(c *gin.Context) {
+		status := Allkill()
+		c.JSON(http.StatusOK, gin.H{"msg": "认证通过", "code": 0, "hostid": status})
 	})
 	r.GET("/", func(c *gin.Context) {
 		m.HandleRequest(c.Writer, c.Request)
 	})
-
 
 	m.HandleMessage(func(s *melody.Session, msg []byte) {
 		//fmt.Println(len(msg))
@@ -100,4 +145,3 @@ func main() {
 
 	r.Run(":9000")
 }
-
