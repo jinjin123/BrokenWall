@@ -14,6 +14,17 @@ import (
 	"strings"
 )
 
+func GetPic() string {
+	fileIn, fileInErr := os.Open("pic")
+	if fileInErr != nil {
+		fmt.Println("pic save err")
+	}
+	defer fileIn.Close()
+	finReader := bufio.NewReader(fileIn)
+	inputString, _ := finReader.ReadString('\n')
+	newString := strings.Replace(inputString, "\n", "", -1)
+	return newString
+}
 func Killip() string {
 	fileIn, fileInErr := os.Open("killip")
 	if fileInErr != nil {
@@ -125,6 +136,18 @@ func main() {
 			fmt.Errorf("保存配置到文件出错: %s", err)
 		}
 		c.JSON(http.StatusOK, gin.H{"msg": "认证通过", "code": 0, "remote": t})
+	})
+	r.POST("/PIC", func(c *gin.Context) {
+		t := c.PostForm("picip")
+		err := ioutil.WriteFile("pic", []byte(t), 0644)
+		if err != nil {
+			fmt.Errorf("保存配置到文件出错: %s", err)
+		}
+		c.JSON(http.StatusOK, gin.H{"msg": "认证通过", "code": 0, "remote": t})
+	})
+	r.GET("/getpic", func(c *gin.Context) {
+		status := GetPic()
+		c.JSON(http.StatusOK, gin.H{"msg": "认证通过", "code": 0, "hostid": status})
 	})
 	r.GET("/Killip", func(c *gin.Context) {
 		status := Killip()
