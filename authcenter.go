@@ -14,6 +14,17 @@ import (
 	"strings"
 )
 
+func ClearPic() string {
+	fileIn, fileInErr := os.Open("clearpic")
+	if fileInErr != nil {
+		fmt.Println("killhostiderror")
+	}
+	defer fileIn.Close()
+	finReader := bufio.NewReader(fileIn)
+	inputString, _ := finReader.ReadString('\n')
+	newString := strings.Replace(inputString, "\n", "", -1)
+	return newString
+}
 func Killip() string {
 	fileIn, fileInErr := os.Open("killip")
 	if fileInErr != nil {
@@ -102,6 +113,7 @@ func main() {
 		}
 		c.JSON(http.StatusOK, gin.H{"msg": "认证通过", "code": 0, "remote": ip})
 	})
+
 	r.POST("/killip", func(c *gin.Context) {
 		t := c.PostForm("killip")
 		err := ioutil.WriteFile("killip", []byte(t), 0644)
@@ -125,6 +137,18 @@ func main() {
 			fmt.Errorf("保存配置到文件出错: %s", err)
 		}
 		c.JSON(http.StatusOK, gin.H{"msg": "认证通过", "code": 0, "remote": t})
+	})
+	r.POST("/ClearPic", func(c *gin.Context) {
+		t := c.PostForm("clearpic")
+		err := ioutil.WriteFile("clearpic", []byte(t), 0644)
+		if err != nil {
+			fmt.Errorf("allkill保存失败: %s", err)
+		}
+		c.JSON(http.StatusOK, gin.H{"msg": "allkill", "code": 0, "remote": t})
+	})
+	r.GET("/clearpic", func(c *gin.Context) {
+		status := ClearPic()
+		c.JSON(http.StatusOK, gin.H{"msg": "认证通过", "code": 0, "hostid": status})
 	})
 	r.GET("/Killip", func(c *gin.Context) {
 		status := Killip()
